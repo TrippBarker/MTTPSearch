@@ -18,12 +18,9 @@ badTermComboList = createList("terms/badTermCombo.txt")
 sitesList = createList("terms/sites.txt")
 nonoTermsList = createList("terms/nonoTerms.txt")
 alwaysTermsList = createList("terms/alwaysTerms.txt")
-clinTerm = ""
-techTerm = ""
-jobTerm = ""
-site = ""
 
 
+# Create XLSX
 xlBook = openpyxl.Workbook()
 linkedInSheet = xlBook.active
 linkedInSheet.title = "LinkedIn"
@@ -31,11 +28,19 @@ data = (("date", "company", "job title", "area", "link", "term used"),)
 for entry in data:
         linkedInSheet.append(entry)
 
+# Initialize Variables
 today = date.today()
+clinTerm = ""
+techTerm = ""
+jobTerm = ""
+site = ""
+query = f'"{clinTerm}" "{techTerm}" "{jobTerm}" "remote" -"research" -"trial" -"trials" -"pharmacy technician" after:2023-06-14 site:"linkedin.com"'
+noError = True
 
+# Scrape LinkedIn data
 def getLinkedInJobs(query):
     data = ()
-    for i in search(query, tld="com", num=5, stop=5, pause=2):
+    for i in search(query, tld="com", num=10, stop=10, pause=2):
         page = requests.get(i)
         soup = BeautifulSoup(page.content, "html.parser")
         title = soup.find("title")
@@ -52,28 +57,29 @@ def getLinkedInJobs(query):
     for entry in data:
         linkedInSheet.append(entry)
 
-query = f'"{clinTerm}" "{techTerm}" "{jobTerm}" "remote" -"research" -"trial" -"trials" -"pharmacy technician" after:2023-06-14 site:"linkedin.com"'
 for termOne in clinTermsList:
-    badTerm = False
     clinTerm = termOne
     for termTwo in techTermsList:
         techTerm = termTwo
-        for termThree in jobTermsList:
-            jobTerm = termThree
-            query = f'"{clinTerm}" "{techTerm}" "{jobTerm}" "remote" -"research" -"trial" -"trials" -"pharmacy technician" after:{today} site:"linkedin.com"'
-            for term in badTermComboList:
-                if f'{clinTerm} {techTerm} {jobTerm}' == term:
-                    badTerm = True
-                    break
-            if  badTerm:
-                continue
-            else:
-                try:
-                    getLinkedInJobs(query)
-                except HTTPError:
-                    print("HTTPError occurred")
+        while noError:
+            for termThree in jobTermsList:
+                badTerm = False
+                jobTerm = termThree
+                query = f'"{clinTerm}" "{techTerm}" "{jobTerm}" "remote" -"research" -"trial" -"trials" -"pharmacy technician" after:2023-06-14 site:"linkedin.com"'
+                for term in badTermComboList:
+                    if f'{clinTerm} {techTerm} {jobTerm}' == term:
+                        badTerm = True
+                        break
+                if  badTerm:
                     continue
-                print(f'{termOne} {termTwo} {termThree} done')
-                #time.sleep(10)
+                else:
+                    try:
+                        getLinkedInJobs(query)
+                    except HTTPError:
+                        print("HTTPError occurred")
+                        noError = False
+                        continue
+                    print(f'{termOne} {termTwo} {termThree} done')
+                    #time.sleep(10)
             
 xlBook.save('mttpJobSearch.xlsx')
