@@ -13,6 +13,7 @@ def createList(fileLoc):
 clinTermsList = createList("terms/clinicalTerms.txt")
 techTermsList = createList("terms/techTerms.txt")
 jobTermsList = createList("terms/jobTerms.txt")
+badTermComboList = createList("terms/badTermCombo.txt")
 clinTerm = ""
 techTerm = ""
 jobTerm = ""
@@ -27,7 +28,7 @@ today = date.today()
 
 def getLinkedInJobs(query):
     data = ()
-    for i in search(query, tld="com", num=10, stop=10, pause=2):
+    for i in search(query, tld="com", num=5, stop=5, pause=2):
         page = requests.get(i)
         soup = BeautifulSoup(page.content, "html.parser")
         title = soup.find("title")
@@ -45,15 +46,23 @@ def getLinkedInJobs(query):
 
 query = f'"{clinTerm}" "{techTerm}" "{jobTerm}" "remote" -"research" -"trial" -"trials" -"pharmacy technician" after:{today} site:"linkedin.com"'
 for termOne in clinTermsList:
+    badTerm = False
     clinTerm = termOne
     for termTwo in techTermsList:
         techTerm = termTwo
         for termThree in jobTermsList:
             jobTerm = termThree
             query = f'"{clinTerm}" "{techTerm}" "{jobTerm}" "remote" -"research" -"trial" -"trials" -"pharmacy technician" after:{today} site:"linkedin.com"'
-            data += getLinkedInJobs(query)
-            print(f'{termOne} {termTwo} {termThree} done')
-            time.sleep(10)
+            for term in badTermComboList:
+                if f'{clinTerm} {techTerm} {jobTerm}' == term:
+                    badTerm = True
+                    break
+            if  badTerm:
+                continue
+            else:
+                #data += getLinkedInJobs(query)
+                print(f'{termOne} {termTwo} {termThree} done')
+                #time.sleep(10)
             
 
 for entry in data:
