@@ -1,6 +1,7 @@
 from googlesearch import search
 from datetime import date
 from bs4 import BeautifulSoup
+from urllib.error import HTTPError
 import time
 import requests
 import openpyxl
@@ -14,9 +15,13 @@ clinTermsList = createList("terms/clinicalTerms.txt")
 techTermsList = createList("terms/techTerms.txt")
 jobTermsList = createList("terms/jobTerms.txt")
 badTermComboList = createList("terms/badTermCombo.txt")
+sitesList = createList("terms/sites.txt")
+nonoTermsList = createList("terms/nonoTerms.txt")
+alwaysTermsList = createList("terms/alwaysTerms.txt")
 clinTerm = ""
 techTerm = ""
 jobTerm = ""
+site = ""
 
 
 xlBook = openpyxl.Workbook()
@@ -28,7 +33,7 @@ today = date.today()
 
 def getLinkedInJobs(query):
     data = ()
-    for i in search(query, tld="com", num=5, stop=5, pause=2):
+    for i in search(query, tld="com", num=1, stop=1, pause=2):
         page = requests.get(i)
         soup = BeautifulSoup(page.content, "html.parser")
         title = soup.find("title")
@@ -42,7 +47,8 @@ def getLinkedInJobs(query):
                 link = i
                 termUsed = f'{clinTerm} {techTerm} {jobTerm}'
                 data += ((today, company, jobTitle, area, link, termUsed),)
-    return data
+    for entry in data:
+        linkedInSheet.append(entry)
 
 query = f'"{clinTerm}" "{techTerm}" "{jobTerm}" "remote" -"research" -"trial" -"trials" -"pharmacy technician" after:{today} site:"linkedin.com"'
 for termOne in clinTermsList:
@@ -60,11 +66,12 @@ for termOne in clinTermsList:
             if  badTerm:
                 continue
             else:
-                #data += getLinkedInJobs(query)
+                try:
+                    getLinkedInJobs(query)
+                except HTTPError:
+                    print("HTTPError occurred")
+                    continue
                 print(f'{termOne} {termTwo} {termThree} done')
                 #time.sleep(10)
             
-
-for entry in data:
-    linkedInSheet.append(entry)
 xlBook.save('mttpJobSearch.xlsx')
