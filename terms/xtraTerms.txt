@@ -2,7 +2,7 @@ health
 healthcare
 medical
 provider
-
+clinical
 
 architect
 consultant
@@ -14,8 +14,9 @@ coordinator
 associate
 trainer
 associate
+analyst
 
-
+emr
 application
 solution
 customer success
