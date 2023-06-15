@@ -28,12 +28,14 @@ xlBook = openpyxl.Workbook()
 linkedInSheet = xlBook.active
 linkedInSheet.title = "LinkedIn"
 data = (("date", "company", "job title", "area", "link", "term used"),)
+for entry in data:
+        linkedInSheet.append(entry)
 
 today = date.today()
 
 def getLinkedInJobs(query):
     data = ()
-    for i in search(query, tld="com", num=1, stop=1, pause=2):
+    for i in search(query, tld="com", num=5, stop=5, pause=2):
         page = requests.get(i)
         soup = BeautifulSoup(page.content, "html.parser")
         title = soup.find("title")
@@ -50,7 +52,7 @@ def getLinkedInJobs(query):
     for entry in data:
         linkedInSheet.append(entry)
 
-query = f'"{clinTerm}" "{techTerm}" "{jobTerm}" "remote" -"research" -"trial" -"trials" -"pharmacy technician" after:{today} site:"linkedin.com"'
+query = f'"{clinTerm}" "{techTerm}" "{jobTerm}" "remote" -"research" -"trial" -"trials" -"pharmacy technician" after:2023-06-14 site:"linkedin.com"'
 for termOne in clinTermsList:
     badTerm = False
     clinTerm = termOne
