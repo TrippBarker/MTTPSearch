@@ -1,12 +1,2 @@
 analyst
 manager
-architect
-consultant
-specialist
-liaison
-informaticist
-lead
-coordinator
-associate
-trainer
-associate

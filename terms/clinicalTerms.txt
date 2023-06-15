@@ -1,6 +1,2 @@
 pharmacy
 clinical
-health
-healthcare
-medical
-provider
