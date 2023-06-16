@@ -41,7 +41,6 @@ jobTerm = ""
 site = ""
 query = f'"{clinTerm}" "{techTerm}" "{jobTerm}" "remote" -"research" -"trial" -"trials" -"pharmacy technician" after:2023-06-14 site:"linkedin.com"|site:"wellfound.com"'
 noError = True
-linksGrabbed = ()
 
 # Scrape LinkedIn Page
 def scrapeLinkedIn(soup, i):
@@ -71,19 +70,19 @@ def appendOtherSites(i):
 
 # Get sites with query
 def getSites(query):
+    linksGrabbed = ("",)
     for i in search(query, tld="com", num=10, stop=10, pause=2):
         for link in linksGrabbed:
             if i == link:
                 continue
             else:
-                linksGrabbed += i
+                linksGrabbed += (i,)
                 page = requests.get(i, headers=headers)
                 soup = BeautifulSoup(page.content, "html.parser")
                 if "www.linkedin.com" in i:
                     scrapeLinkedIn(soup, i)
                 elif "wellfound.com" in i:
-                    print(soup.contents)
-                    print(i)
+                    scrapeWellfound(soup, i)
                 else:
                     appendOtherSites(i)
         
@@ -95,7 +94,7 @@ for termOne in clinTermsList:
         for termThree in jobTermsList:
             badTerm = False
             jobTerm = termThree
-            query = f'"{clinTerm}" "{techTerm}" "{jobTerm}" "remote" -"research" -"trial" -"trials" -"pharmacy technician" after:2023-06-14 site:linkedin.com | site:wellfound.com'
+            query = f'"{clinTerm}" "{techTerm}" "{jobTerm}" "remote" -"research" -"trial" -"trials" -"pharmacy technician" after:{today} site:linkedin.com | site:wellfound.com'
             for term in badTermComboList:
                 if f'{clinTerm} {techTerm} {jobTerm}' == term:
                     badTerm = True
